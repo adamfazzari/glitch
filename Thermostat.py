@@ -38,8 +38,10 @@ class Thermostat(object):
 
     def _monitor(self):
         while self._monitor_active:
+            print("Starting thermostat write")
             self._write_thermostat()
             time.sleep(self._monitor_period * 1 / 10)
+            print("Starting thermostat read")
             self._read_thermostat()
             time.sleep(self._monitor_period * 9 / 10)
 
@@ -52,7 +54,7 @@ class Thermostat(object):
             #print jline['temp']
             self.current_temp.fahrenheit = float(jline['temp'])
             self.set_point_temp.fahrenheit = float(jline['t_heat'])
-            self.furnace_state.fahrenheit = float(jline['tstate'])
+            self.furnace_state = int(jline['tstate'])
 
         #print self.current_temp.fahrenheit
         print ("Current temp in celsius: " + str(self.current_temp.celsius))

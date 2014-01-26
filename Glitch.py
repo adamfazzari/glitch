@@ -35,6 +35,7 @@ class Glitch(object):
             d['field1'] = self.tstat.current_temp.fahrenheit
             d['field2'] = self.tstat.set_point_temp.fahrenheit
             d['field3'] = self.tstat.furnace_state
+            print(d)
             self.ts.write(d)
             #Update thingspeak every 5 minutes
             time.sleep(300)
