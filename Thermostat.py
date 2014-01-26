@@ -29,6 +29,7 @@ class Thermostat(object):
         self.JSON_HEADER = {'Content-Type': 'application/json'}
         self.current_temp = Temperature()
         self.set_point_temp = Temperature()
+        self.furnace_state = 0
         self.command = ''
         self._monitor_thread = Thread(target=self._monitor)
         self._monitor_active = False
@@ -50,6 +51,8 @@ class Thermostat(object):
         if jline['temp'] != -1:
             #print jline['temp']
             self.current_temp.fahrenheit = float(jline['temp'])
+            self.set_point_temp.fahrenheit = float(jline['t_heat'])
+            self.furnace_state.fahrenheit = float(jline['tstate'])
 
         #print self.current_temp.fahrenheit
         print ("Current temp in celsius: " + str(self.current_temp.celsius))

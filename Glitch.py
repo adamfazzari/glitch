@@ -7,6 +7,7 @@ import time
 import ConfigParser
 import os
 
+
 class Glitch(object):
 
     def __init__(self):
@@ -32,6 +33,8 @@ class Glitch(object):
         while True:
             d = dict()
             d['field1'] = self.tstat.current_temp.fahrenheit
+            d['field2'] = self.tstat.set_point_temp.fahrenheit
+            d['field3'] = self.tstat.furnace_state
             self.ts.write(d)
             #Update thingspeak every 5 minutes
             time.sleep(300)
