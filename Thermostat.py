@@ -4,23 +4,7 @@ import time
 import json
 import urllib2
 from threading import Thread
-
-class Temperature(object):
-
-    def __init__(self):
-        self.c_temp = 0
-
-    def f_get(self):
-        return self.celsius * 9 / 5 + 32
-    def f_set(self, value):
-        self.celsius = (float(value)-32) * 5 / 9
-    fahrenheit = property(f_get, f_set)
-
-    def c_set(self, value):
-        self.c_temp = float(value)
-    def c_get(self):
-        return self.c_temp
-    celsius = property(c_get, c_set)
+from Temperature import Temperature
 
 
 class Thermostat(object):
@@ -46,7 +30,7 @@ class Thermostat(object):
             time.sleep(self._monitor_period * 9 / 10)
 
     def _read_thermostat(self):
-        response = urllib2.urlopen('http://' + self._ip_address  + '/tstat')
+        response = urllib2.urlopen('http://' + self._ip_address + '/tstat')
         line = response.readline()
         print(line)
         jline = json.loads(line)

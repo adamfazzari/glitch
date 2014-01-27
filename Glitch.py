@@ -1,6 +1,7 @@
 __author__ = 'Adam'
 
 from Thermostat import Thermostat
+from Weather import WeatherMonitor
 from Thingspeak import Thingspeak
 from threading import Thread
 import time
@@ -15,7 +16,11 @@ class Glitch(object):
 
         self.ts = Thingspeak(self._thingspeak_api_key)
         self.tstat = Thermostat(self._thermostat_ip_address, 60)
+        print(self._city_code)
+        self.weather = WeatherMonitor(self._city_code, 600)
+
         self.tstat.start_monitor()
+        self.weather.start_monitor()
 
         #Wait 1 minute to start the thingspeak thread, allow the thermostat time to read
         time.sleep(60)
@@ -26,21 +31,23 @@ class Glitch(object):
         config = ConfigParser.ConfigParser()
         conf_file = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__), "glitch.conf"))
         config.read(conf_file)
-        self._thingspeak_api_key = self.ConfigSectionMap(config,"ThingSpeak")['key']
-        self._thermostat_ip_address = self.ConfigSectionMap(config,"Thermostat")['ip_address']
+        self._thingspeak_api_key = self.ConfigSectionMap(config, "ThingSpeak")['key']
+        self._thermostat_ip_address = self.ConfigSectionMap(config, "Thermostat")['ip_address']
+        self._city_code = self.ConfigSectionMap(config, "Weather")['city_code']
 
     def thingspeak_thread(self):
         while True:
             d = dict()
-            d['field1'] = self.tstat.current_temp.fahrenheit
-            d['field2'] = self.tstat.set_point_temp.fahrenheit
+            d['field1'] = self.tstat.current_temp.celsius
+            d['field2'] = self.tstat.set_point_temp.celsius
             d['field3'] = self.tstat.furnace_state
+            d['field4'] = self.weather.current_temp.celsius
             print(d)
             self.ts.write(d)
             #Update thingspeak every 5 minutes
             time.sleep(300)
 
-    def ConfigSectionMap(self,config,section):
+    def ConfigSectionMap(self, config, section):
         dict1 = {}
         options = config.options(section)
         for option in options:
@@ -55,6 +62,5 @@ class Glitch(object):
         return dict1
 
 if __name__ == '__main__':
-
     g = Glitch()
 
