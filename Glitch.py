@@ -4,6 +4,7 @@ from Thermostat import Thermostat
 from Weather import WeatherMonitor
 from Thingspeak import Thingspeak
 from threading import Thread
+from Pushover import Pushover
 import time
 import ConfigParser
 import os
@@ -13,6 +14,10 @@ class Glitch(object):
 
     def __init__(self):
         self._load_settings()
+
+        #Pushover
+        self.pushover = Pushover(self._pushover_token, self._pushover_client)
+        self.pushover.send_message("Can you hear me?", "Glitch")
 
         self.ts = Thingspeak(self._thingspeak_api_key)
         self.tstat = Thermostat(self._thermostat_ip_address, 60)
@@ -34,6 +39,8 @@ class Glitch(object):
         self._thingspeak_api_key = self.ConfigSectionMap(config, "ThingSpeak")['key']
         self._thermostat_ip_address = self.ConfigSectionMap(config, "Thermostat")['ip_address']
         self._city_code = self.ConfigSectionMap(config, "Weather")['city_code']
+        self._pushover_token = self.ConfigSectionMap(config, "Pushover")['token']
+        self._pushover_client = self.ConfigSectionMap(config, "Pushover")['client']
 
     def thingspeak_thread(self):
         while True:
