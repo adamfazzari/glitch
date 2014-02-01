@@ -17,10 +17,11 @@ class Glitch(object):
 
         #Pushover
         self.pushover = Pushover(self._pushover_token, self._pushover_client)
-        self.pushover.send_message("Can you hear me?", "Glitch")
+        self.notify("Can you hear me?")
 
         self.ts = Thingspeak(self._thingspeak_api_key)
         self.tstat = Thermostat(self._thermostat_ip_address, self._thermostat_period_s)
+        self.tstat._notify_callback = self.notify
         print(self._city_code)
         self.weather = WeatherMonitor(self._city_code, self._weather_period_s)
 
@@ -32,16 +33,19 @@ class Glitch(object):
         self._main_thread = Thread(target=self.thingspeak_thread)
         self._main_thread.start()
 
+    def notify(self, message):
+        self.pushover.send_message(message, "Glitch")
+
     def _load_settings(self):
         config = ConfigParser.ConfigParser()
         conf_file = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__), "glitch.conf"))
         config.read(conf_file)
         self._thingspeak_api_key = self.ConfigSectionMap(config, "ThingSpeak")['key']
-        self._thingspeak_period_s = self.ConfigSectionMap(config, "ThingSpeak")['period_s']
+        self._thingspeak_period_s = int(self.ConfigSectionMap(config, "ThingSpeak")['period_s'])
         self._thermostat_ip_address = self.ConfigSectionMap(config, "Thermostat")['ip_address']
-        self._thermostat_period_s = self.ConfigSectionMap(config, "Thermostat")['period_s']
+        self._thermostat_period_s = int(self.ConfigSectionMap(config, "Thermostat")['period_s'])
         self._city_code = self.ConfigSectionMap(config, "Weather")['city_code']
-        self._weather_period_s = self.ConfigSectionMap(config, "Weather")['period_s']
+        self._weather_period_s = int(self.ConfigSectionMap(config, "Weather")['period_s'])
         self._pushover_token = self.ConfigSectionMap(config, "Pushover")['token']
         self._pushover_client = self.ConfigSectionMap(config, "Pushover")['client']
 
