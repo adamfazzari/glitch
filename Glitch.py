@@ -20,9 +20,9 @@ class Glitch(object):
         self.pushover.send_message("Can you hear me?", "Glitch")
 
         self.ts = Thingspeak(self._thingspeak_api_key)
-        self.tstat = Thermostat(self._thermostat_ip_address, 60)
+        self.tstat = Thermostat(self._thermostat_ip_address, self._thermostat_period_s)
         print(self._city_code)
-        self.weather = WeatherMonitor(self._city_code, 600)
+        self.weather = WeatherMonitor(self._city_code, self._weather_period_s)
 
         self.tstat.start_monitor()
         self.weather.start_monitor()
@@ -37,8 +37,11 @@ class Glitch(object):
         conf_file = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__), "glitch.conf"))
         config.read(conf_file)
         self._thingspeak_api_key = self.ConfigSectionMap(config, "ThingSpeak")['key']
+        self._thingspeak_period_s = self.ConfigSectionMap(config, "ThingSpeak")['period_s']
         self._thermostat_ip_address = self.ConfigSectionMap(config, "Thermostat")['ip_address']
+        self._thermostat_period_s = self.ConfigSectionMap(config, "Thermostat")['period_s']
         self._city_code = self.ConfigSectionMap(config, "Weather")['city_code']
+        self._weather_period_s = self.ConfigSectionMap(config, "Weather")['period_s']
         self._pushover_token = self.ConfigSectionMap(config, "Pushover")['token']
         self._pushover_client = self.ConfigSectionMap(config, "Pushover")['client']
 
@@ -52,7 +55,7 @@ class Glitch(object):
             print(d)
             self.ts.write(d)
             #Update thingspeak every 5 minutes
-            time.sleep(300)
+            time.sleep(self._thingspeak_period_s)
 
     def ConfigSectionMap(self, config, section):
         dict1 = {}
