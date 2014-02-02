@@ -5,6 +5,7 @@ from Weather import WeatherMonitor
 from Thingspeak import Thingspeak
 from threading import Thread
 from Pushover import Pushover
+from ArduinoClient import ArduinoClient
 import time
 import ConfigParser
 import os
@@ -19,10 +20,14 @@ class Glitch(object):
         self.pushover = Pushover(self._pushover_token, self._pushover_client)
         self.notify("Can you hear me?")
 
+        #Thingspeak
         self.ts = Thingspeak(self._thingspeak_api_key)
+
+        #Thermostat
         self.tstat = Thermostat(self._thermostat_ip_address, self._thermostat_period_s)
         self.tstat._notify_callback = self.notify
-        print(self._city_code)
+
+        #Weather monitor
         self.weather = WeatherMonitor(self._city_code, self._weather_period_s)
 
         self.tstat.start_monitor()
