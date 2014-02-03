@@ -23,6 +23,10 @@ class Glitch(object):
         #Thingspeak
         self.ts = Thingspeak(self._thingspeak_api_key)
 
+        #Arduino
+        self.arduino = ArduinoClient('192.168.0.214', 1213)
+        self.arduino.thingspeak_client = self.ts
+
         #Thermostat
         self.tstat = Thermostat(self._thermostat_ip_address, self._thermostat_period_s)
         self.tstat._notify_callback = self.notify

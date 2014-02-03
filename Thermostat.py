@@ -139,8 +139,8 @@ if __name__ == '__main__':
 
 
     t = Thermostat('192.168.0.146', 60)
-    t.set_time(4,21,5)
-    t._write_thermostat()
+    #t.set_time(4,21,5)
+    #t._write_thermostat()
 
 
     #print ("This is test number %d" % (2))
