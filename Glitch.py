@@ -25,7 +25,6 @@ class Glitch(object):
 
         #Arduino
         self.arduino = ArduinoClient(self._arduino_ip_address, self._arduino_port)
-        self.arduino.thingspeak_client = self.ts
 
         #Thermostat
         self.tstat = Thermostat(self._thermostat_ip_address, self._thermostat_period_s)
@@ -67,6 +66,9 @@ class Glitch(object):
             d['field2'] = self.tstat.set_point_temp.celsius
             d['field3'] = self.tstat.furnace_state
             d['field4'] = self.weather.current_temp.celsius
+            d['field5'] = self.arduino._living_room_state
+            d['field6'] = self.arduino._basement_hallway_state
+            d['field7'] = self.arduino._basement_state
             print(d)
             self.ts.write(d)
             #Update thingspeak every 5 minutes
@@ -88,4 +90,3 @@ class Glitch(object):
 
 if __name__ == '__main__':
     g = Glitch()
-

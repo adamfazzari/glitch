@@ -13,7 +13,12 @@ class ArduinoClient(object):
         self.thingspeak_client = None
         self.ip_address = ip_address
         self.port = port
+        self._basement_state = 0
+        self._basement_hallway_state = 0
+        self._living_room_state = 0
+
         self.connect()
+
 
     def connect(self):
         self.socket.connect((self.ip_address, self.port))
@@ -40,10 +45,13 @@ class ArduinoClient(object):
         d = dict()
         if j.has_key('Living Room'):
             d['field5'] = j['Living Room']
+            self._living_room_state = j['Living Room']
         if j.has_key('Basement Hallway'):
             d['field6'] = j['Basement Hallway']
+            self._basement_hallway_state = j['Basement Hallway']
         if j.has_key('Basement'):
             d['field7'] = j['Basement']
+            self._basement_state = j['Basement']
         if self.thingspeak_client:
             self.thingspeak_client.write(d)
 
