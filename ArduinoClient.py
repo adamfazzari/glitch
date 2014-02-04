@@ -37,9 +37,14 @@ class ArduinoClient(object):
 
     def parse_message(self, message):
         j = json.loads(message)
+        d = dict()
         if j.has_key('Living Room'):
-            d = dict()
             d['field5'] = j['Living Room']
+        if j.has_key('Basement Hallway'):
+            d['field6'] = j['Basement Hallway']
+        if j.has_key('Basement'):
+            d['field7'] = j['Basement']
+        if self.thingspeak_client:
             self.thingspeak_client.write(d)
 
 if __name__ == "__main__":
