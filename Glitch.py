@@ -51,7 +51,7 @@ class Glitch(object):
         self._thingspeak_api_key = self.ConfigSectionMap(config, "ThingSpeak")['key']
         self._thingspeak_period_s = int(self.ConfigSectionMap(config, "ThingSpeak")['period_s'])
         self._arduino_ip_address = self.ConfigSectionMap(config, "Arduino")['ip_address']
-        self._arduino_port = self.ConfigSectionMap(config, "Arduino")['port']
+        self._arduino_port = int(self.ConfigSectionMap(config, "Arduino")['port'])
         self._thermostat_ip_address = self.ConfigSectionMap(config, "Thermostat")['ip_address']
         self._thermostat_period_s = int(self.ConfigSectionMap(config, "Thermostat")['period_s'])
         self._city_code = self.ConfigSectionMap(config, "Weather")['city_code']
