@@ -45,15 +45,18 @@ class Thermostat(object):
         line = response.readline()
         print(line)
         jline = json.loads(line)
-        if jline['temp'] != -1:
-            self.current_temp.fahrenheit = float(jline['temp'])
-            read_successful = True
-        if jline['t_heat'] != -1:
-            self.set_point_temp.fahrenheit = float(jline['t_heat'])
-            read_successful = True
-        if jline['tstate'] != -1:
-            self.furnace_state = int(jline['tstate'])
-            read_successful = True
+        if jline.has_key('temp'):
+            if jline['temp'] != -1:
+                self.current_temp.fahrenheit = float(jline['temp'])
+                read_successful = True
+        if jline.has_key('t_head'):
+            if jline['t_heat'] != -1:
+                self.set_point_temp.fahrenheit = float(jline['t_heat'])
+                read_successful = True
+        if jline.has_key('tstate'):
+            if jline['tstate'] != -1:
+                self.furnace_state = int(jline['tstate'])
+                read_successful = True
 
         self.current_time = jline['time']
 
