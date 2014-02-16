@@ -6,6 +6,7 @@ import datetime
 import os
 from threading import Thread
 import time
+import json
 
 class Proximity(object):
 
@@ -36,7 +37,8 @@ class Proximity(object):
         for s in sensor_names:
             self.motion_sensors[s] = 0
 
-    def motion_event_handler(self, msg):
+    def motion_event_handler(self, message):
+        msg = json.loads(message)
         for k, v in msg.iteritems():
             if self.motion_sensors.has_key(k):
                 self.motion_sensors[k] = v
