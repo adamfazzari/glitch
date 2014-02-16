@@ -49,7 +49,7 @@ class Thermostat(object):
             if jline['temp'] != -1:
                 self.current_temp.fahrenheit = float(jline['temp'])
                 read_successful = True
-        if jline.has_key('t_head'):
+        if jline.has_key('t_heat'):
             if jline['t_heat'] != -1:
                 self.set_point_temp.fahrenheit = float(jline['t_heat'])
                 read_successful = True
