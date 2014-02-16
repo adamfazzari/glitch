@@ -48,7 +48,7 @@ class Proximity(object):
                 else:
                     # check to see if all motion has stopped
                     motion = 0
-                    for k, v in self.motion_sensors:
+                    for k, v in self.motion_sensors.iteritems():
                         motion += int(v)
                     if motion == 0:
                         print("All motion ended")
