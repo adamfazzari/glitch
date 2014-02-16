@@ -6,6 +6,7 @@ from Thingspeak import Thingspeak
 from threading import Thread
 from Pushover import Pushover
 from ArduinoClient import ArduinoClient
+from Proximity import Proximity
 import time
 import ConfigParser
 import os
@@ -25,6 +26,11 @@ class Glitch(object):
 
         #Arduino
         self.arduino = ArduinoClient(self._arduino_ip_address, self._arduino_port)
+
+        #Proximity
+        self.proximity = Proximity()
+        self.proximity.set_motion_sensor(self.arduino, ('Living Room', 'Basement Hallway', 'Basement'))
+        self.proximity.add_ping_node('192.168.0.110')
 
         #Thermostat
         self.tstat = Thermostat(self._thermostat_ip_address, self._thermostat_period_s)

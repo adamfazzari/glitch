@@ -3,7 +3,7 @@ __author__ = 'Adam'
 import socket
 import json
 from threading import Thread
-
+from EventHook import EventHook
 
 class ArduinoClient(object):
 
@@ -16,9 +16,8 @@ class ArduinoClient(object):
         self._basement_state = 0
         self._basement_hallway_state = 0
         self._living_room_state = 0
-
+        self.message_received = EventHook()
         self.connect()
-
 
     def connect(self):
         self.socket.connect((self.ip_address, self.port))
@@ -38,6 +37,7 @@ class ArduinoClient(object):
             if msg.endswith('\n'):
                 print (msg)
                 self.parse_message(msg)
+                self.message_received.fire(msg)
                 msg = ''
 
     def parse_message(self, message):

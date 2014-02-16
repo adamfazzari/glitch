@@ -35,7 +35,7 @@ class Thermostat(object):
                 self._read_errors += 1
 
             if self._read_errors == 5:
-                self.notify("Haven't made contact with thermostat in %1 cycles")
+                self.notify("Haven't made contact with thermostat in 5 cycles")
 
             time.sleep(self._monitor_period * 9 / 10)
 
