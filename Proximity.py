@@ -56,14 +56,14 @@ class Proximity(object):
     def is_anyone_home(self):
         #Figures out based on various inputs if anyone is home
         motion = False
-        if len(self.motion_sensors.items()) > 0:
+        if len(self.motion_sensors) > 0:
             motion = True
             td = datetime.datetime.now() - self.last_motion_ended
             if td.total_seconds() > 1800:
                 motion = False
 
         ping = False
-        if len(self.ping_nodes.count()) > 0:
+        if len(self.ping_nodes) > 0:
             ping = True
             td = datetime.datetime.now() - self.last_ping_detected
             if td.total_seconds() > 1800:
