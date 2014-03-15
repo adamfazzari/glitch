@@ -41,7 +41,10 @@ class Thermostat(object):
 
     def _read_thermostat(self):
         read_successful = False
-        response = urllib2.urlopen('http://' + self._ip_address + '/tstat')
+        try:
+            response = urllib2.urlopen('http://' + self._ip_address + '/tstat')
+        except:
+            return read_successful
         line = response.readline()
         print(line)
         jline = json.loads(line)
