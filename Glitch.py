@@ -75,7 +75,7 @@ class Glitch(object):
             d['field5'] = self.arduino._living_room_state
             d['field6'] = self.arduino._basement_hallway_state
             d['field7'] = self.arduino._basement_state
-            d['field8'] = int(self.proximity.is_anyone_home())
+            #d['field8'] = int(self.proximity.is_anyone_home())
             print(d)
             self.ts.write(d)
             #Update thingspeak every 5 minutes
