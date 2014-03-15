@@ -85,7 +85,7 @@ class Thermostat(object):
 
         print ("Writing command")
         #data = json.dumps(self.command)
-        request = urllib2.Request('http://192.168.0.146/tstat', self.command, self.JSON_HEADER)
+        request = urllib2.Request('http://' + self._ip_address + '/tstat', self.command, self.JSON_HEADER)
         #Clear the command so we don't write it again
         self.command = ''
         return urllib2.urlopen(request)

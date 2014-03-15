@@ -2,6 +2,7 @@ __author__ = 'Adam'
 
 import socket
 import json
+import time
 from threading import Thread
 from EventHook import EventHook
 
@@ -20,10 +21,13 @@ class ArduinoClient(object):
         self.connect()
 
     def connect(self):
-        self.socket.connect((self.ip_address, self.port))
-        print ("Connected")
-        self.socket.send('Thank you for connecting\n')
-        self.start_listener_thread()
+        try:
+            self.socket.connect((self.ip_address, self.port))
+            self.socket.send('Thank you for connecting\n')
+            self.start_listener_thread()
+            print ("Connected")
+        except:
+            print ("Arduino not found, giving up")
 
     def start_listener_thread(self):
         listener = Thread(target=self.listener_thread)
