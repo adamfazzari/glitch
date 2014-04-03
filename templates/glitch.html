@@ -5,7 +5,12 @@
 <head>
     <title>Glitch</title>
     <h1>{{current_temp}}</h1>
-    <h1>{{armed}}</h1>
+    {% if armed %}
+    <a href="{{ url_for('helloworld', arm='false') }}">Armed</a>
+    {% else %}
+    <a href="{{ url_for('helloworld', arm='true') }}">Unarmed</a>
+    {% endif %}
+    <h1>{{status}}</h1>
 </head>
 <body>
 
