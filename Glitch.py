@@ -124,5 +124,5 @@ if __name__ == '__main__':
         #a = {'current_temp':g.tstat.current_temp.celsius, 'armed':g.armed}
         return render_template('glitch.html', current_temp=g.tstat.current_temp.celsius, armed=g.armed, message=g.status)
 
-    app.run()
+    app.run(host='0.0.0.0')
 
