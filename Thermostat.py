@@ -7,7 +7,6 @@ import urllib2
 from threading import Thread
 from Temperature import Temperature
 
-
 class Thermostat(object):
 
     def __init__(self, address, period_s):

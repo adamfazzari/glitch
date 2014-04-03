@@ -19,6 +19,10 @@ class ArduinoClient(object):
         self._living_room_state = 0
         self.message_received = EventHook()
         self.connect()
+        self.callback = None
+
+    def set_motion_detect_callback(self, callback):
+        self.callback = callback
 
     def connect(self):
         try:
@@ -49,15 +53,25 @@ class ArduinoClient(object):
         d = dict()
         if j.has_key('Living Room'):
             d['field5'] = j['Living Room']
-            self._living_room_state = j['Living Room']
+            if self._living_room_state != j['Living Room']:
+                self._living_room_state = j['Living Room']
+                self.change_detected('Living Room', j['Living Room'])
         if j.has_key('Basement Hallway'):
             d['field6'] = j['Basement Hallway']
-            self._basement_hallway_state = j['Basement Hallway']
+            if self._basement_hallway_state != j['Basement Hallway']:
+                self._basement_hallway_state = j['Basement Hallway']
+                self.change_detected('Basement Hallway', j['Basement Hallway'])
         if j.has_key('Basement'):
             d['field7'] = j['Basement']
-            self._basement_state = j['Basement']
+            if self._basement_state != j['Basement']:
+                self._basement_state = j['Basement']
+                self.change_detected('Basement', j['Basement'])
         if self.thingspeak_client:
             self.thingspeak_client.write(d)
+
+    def change_detected(self, location, state):
+        if state == 1 and self.callback:
+            self.callback(location)
 
 if __name__ == "__main__":
     c = ArduinoClient('192.168.0.214', 1213)

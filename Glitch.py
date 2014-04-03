@@ -6,26 +6,32 @@ from Thingspeak import Thingspeak
 from threading import Thread
 from Pushover import Pushover
 from ArduinoClient import ArduinoClient
-from Proximity import Proximity
+#from Proximity import Proximity
 import time
 import ConfigParser
 import os
+from flask import Flask
+from flask import render_template
+
+app = Flask(__name__)
 
 
 class Glitch(object):
 
     def __init__(self):
+        self.armed = False
+        self.status = ''
         self._load_settings()
 
         #Pushover
         self.pushover = Pushover(self._pushover_token, self._pushover_client)
-        self.notify("Can you hear me?")
 
         #Thingspeak
         self.ts = Thingspeak(self._thingspeak_api_key)
 
         #Arduino
         self.arduino = ArduinoClient(self._arduino_ip_address, self._arduino_port)
+        self.arduino.set_motion_detect_callback(self.motion_detected)
 
         #Proximity
         #self.proximity = Proximity()
@@ -42,8 +48,8 @@ class Glitch(object):
         self.tstat.start_monitor()
         self.weather.start_monitor()
 
-        #Wait 1 minute to start the thingspeak thread, allow the thermostat time to read
-        time.sleep(60)
+        self.notify("Can you hear me?")
+
         self._main_thread = Thread(target=self.thingspeak_thread)
         self._main_thread.start()
 
@@ -66,6 +72,9 @@ class Glitch(object):
         self._pushover_client = self.ConfigSectionMap(config, "Pushover")['client']
 
     def thingspeak_thread(self):
+        # Wait 60 seconds to let things warm up
+        time.sleep(60)
+
         while True:
             d = dict()
             d['field1'] = self.tstat.current_temp.celsius
@@ -95,5 +104,25 @@ class Glitch(object):
                 dict1[option] = None
         return dict1
 
+    def motion_detected(self, location):
+        if self.armed:
+            self.arduino.set_motion_detect_callback(None)
+            self.status = "Motion detected in " + location
+            self.notify(self.status)
+
 if __name__ == '__main__':
     g = Glitch()
+
+    @app.route('/')
+    @app.route('/<arm>')
+    def helloworld(arm='none'):
+        if arm == 'true':
+            g.armed = True
+        elif arm == 'false':
+            g.armed = False
+            g.status = ''
+        #a = {'current_temp':g.tstat.current_temp.celsius, 'armed':g.armed}
+        return render_template('glitch.html', current_temp=g.tstat.current_temp.celsius, armed=g.armed, message=g.status)
+
+    app.run()
+
