@@ -20,7 +20,7 @@ app = Flask(__name__)
 class Glitch(object):
 
     def __init__(self):
-        logging.basicConfig(filename='glitch.log', level=logging.DEBUG)
+        logging.basicConfig(filename='/var/log/glitch.log', level=logging.DEBUG)
         logging.info("Glitch: Started")
         self.armed = False
         self.status = ''
@@ -106,6 +106,14 @@ class Glitch(object):
                 logging.error("exception on %s!" % option)
                 dict1[option] = None
         return dict1
+    
+    def arm(self):
+        self.armed = True
+        self.arduino.set_motion_detect_callback(self.motion_detected)
+
+    def disarm(self):
+        self.armed = False
+        self.status = ''
 
     def motion_detected(self, location):
         if self.armed:
@@ -120,10 +128,9 @@ if __name__ == '__main__':
     @app.route('/<arm>')
     def helloworld(arm='none'):
         if arm == 'true':
-            g.armed = True
+            g.arm()
         elif arm == 'false':
-            g.armed = False
-            g.status = ''
+            g.disarm()
         #a = {'current_temp':g.tstat.current_temp.celsius, 'armed':g.armed}
         return render_template('glitch.html', current_temp=g.tstat.current_temp.celsius, armed=g.armed, message=g.status)
 
