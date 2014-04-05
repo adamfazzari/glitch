@@ -88,7 +88,7 @@ class Glitch(object):
             d['field6'] = self.arduino._basement_hallway_state
             d['field7'] = self.arduino._basement_state
             #d['field8'] = int(self.proximity.is_anyone_home())
-            logging.debug("Thingspeak:" + d)
+            logging.debug("Thingspeak:" + str(d))
             self.ts.write(d)
             #Update thingspeak every 5 minutes
             time.sleep(self._thingspeak_period_s)
