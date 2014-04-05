@@ -10,6 +10,7 @@ from ArduinoClient import ArduinoClient
 import time
 import ConfigParser
 import os
+import logging
 from flask import Flask, url_for
 from flask import render_template
 
@@ -19,6 +20,8 @@ app = Flask(__name__)
 class Glitch(object):
 
     def __init__(self):
+        logging.basicConfig(filename='glitch.log', level=logging.DEBUG)
+        logging.info("Glitch: Started")
         self.armed = False
         self.status = ''
         self._load_settings()
@@ -85,7 +88,7 @@ class Glitch(object):
             d['field6'] = self.arduino._basement_hallway_state
             d['field7'] = self.arduino._basement_state
             #d['field8'] = int(self.proximity.is_anyone_home())
-            print(d)
+            logging.debug("Thingspeak:" + d)
             self.ts.write(d)
             #Update thingspeak every 5 minutes
             time.sleep(self._thingspeak_period_s)
@@ -100,7 +103,7 @@ class Glitch(object):
                     pass
                     #DebugPrint("skip: %s" % option)
             except:
-                print("exception on %s!" % option)
+                logging.error("exception on %s!" % option)
                 dict1[option] = None
         return dict1
 

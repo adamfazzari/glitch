@@ -2,6 +2,7 @@ __author__ = 'Adam'
 
 import urllib
 import httplib
+import logging
 
 
 class Thingspeak(object):
@@ -15,7 +16,7 @@ class Thingspeak(object):
         #fields is a dictionary
         fields['key'] = self._api_key
         params = urllib.urlencode(fields)
-        print("Params: " + params)
+        logging.debug("Thingspeak: Params - " + params)
         conn = httplib.HTTPConnection(self._url)
         conn.request('POST','/update/',params,self._headers)
         reponse = conn.getresponse()
