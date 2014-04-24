@@ -8,7 +8,7 @@ from EventHook import EventHook
 
 class ArduinoClient(object):
 
-    def __init__(self, ip_address, port):
+    def __init__(self, ip_address, port, notify):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.listening = False
         self.thingspeak_client = None
@@ -18,8 +18,9 @@ class ArduinoClient(object):
         self._basement_hallway_state = 0
         self._living_room_state = 0
         self.message_received = EventHook()
+	self.notify = notify
+	self.callback = None
         self.connect()
-        self.callback = None
 
     def set_motion_detect_callback(self, callback):
         self.callback = callback
@@ -29,8 +30,10 @@ class ArduinoClient(object):
             self.socket.connect((self.ip_address, self.port))
             self.socket.send('Thank you for connecting\n')
             self.start_listener_thread()
+	    self.notify("Arduino: Connected")
             logging.info("Arduino: Connected")
         except:
+	    self.notify("Arduino: Not found, giving up")
             logging.warning("Arduino: Not found, giving up")
 
     def start_listener_thread(self):

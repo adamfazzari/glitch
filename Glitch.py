@@ -20,7 +20,8 @@ app = Flask(__name__)
 class Glitch(object):
 
     def __init__(self):
-        logging.basicConfig(filename='/var/log/glitch.log', level=logging.DEBUG)
+        #logging.basicConfig(filename='/var/log/glitch.log', level=logging.DEBUG)
+	logging.basicConfig(level=logging.DEBUG)
         logging.info("Glitch: Started")
         self.armed = False
         self.status = ''
@@ -33,8 +34,9 @@ class Glitch(object):
         self.ts = Thingspeak(self._thingspeak_api_key)
 
         #Arduino
-        self.arduino = ArduinoClient(self._arduino_ip_address, self._arduino_port)
+        self.arduino = ArduinoClient(self._arduino_ip_address, self._arduino_port, self.notify)
         self.arduino.set_motion_detect_callback(self.motion_detected)
+	self.max_notifications = 10
 
         #Proximity
         #self.proximity = Proximity()
@@ -109,17 +111,24 @@ class Glitch(object):
     
     def arm(self):
         self.armed = True
+	self.max_notifications = 10
         self.arduino.set_motion_detect_callback(self.motion_detected)
+	self.notify("System armed")
 
     def disarm(self):
         self.armed = False
         self.status = ''
+	notify("System disarmed")
 
     def motion_detected(self, location):
-        if self.armed:
-            self.arduino.set_motion_detect_callback(None)
+        if self.armed and self.max_notifications > 0:
+            #self.arduino.set_motion_detect_callback(None)
+	    self.max_notifications -= 1
             self.status = "Motion detected in " + location
             self.notify(self.status)
+	    if self.max_notifications == 0:
+		self.notify("Maximum number of notifications reached, disarming")
+		self.disarm()
 
 if __name__ == '__main__':
     g = Glitch()
