@@ -118,7 +118,7 @@ class Glitch(object):
     def disarm(self):
         self.armed = False
         self.status = ''
-	notify("System disarmed")
+	self.notify("System disarmed")
 
     def motion_detected(self, location):
         if self.armed and self.max_notifications > 0:
