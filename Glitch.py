@@ -5,6 +5,7 @@ from Weather import WeatherMonitor
 from Thingspeak import Thingspeak
 from threading import Thread
 from Pushover import Pushover
+from EmailNotify import send_mail
 from ArduinoClient import ArduinoClient
 #from Proximity import Proximity
 import time
@@ -60,6 +61,8 @@ class Glitch(object):
 
     def notify(self, message):
         self.pushover.send_message(message, "Glitch")
+	send_mail(self._email_source, self._email_password, "adam.fazzari@gmail.com", "Glitch", message)
+
 
     def _load_settings(self):
         config = ConfigParser.ConfigParser()
@@ -75,6 +78,8 @@ class Glitch(object):
         self._weather_period_s = int(self.ConfigSectionMap(config, "Weather")['period_s'])
         self._pushover_token = self.ConfigSectionMap(config, "Pushover")['token']
         self._pushover_client = self.ConfigSectionMap(config, "Pushover")['client']
+	self._email_source = self.ConfigSectionMap(config, "Email")['source']
+	self._email_password = self.ConfigSectionMap(config, "Email")['password']
 
     def thingspeak_thread(self):
         # Wait 60 seconds to let things warm up
