@@ -61,7 +61,7 @@ class Glitch(object):
 
     def notify(self, message):
         self.pushover.send_message(message, "Glitch")
-	send_mail(self._email_source, self._email_password, "adam.fazzari@gmail.com", "Glitch", message)
+	send_mail(self._email_source, self._email_password, self._email_destination, "Glitch", message)
 
 
     def _load_settings(self):
@@ -80,6 +80,7 @@ class Glitch(object):
         self._pushover_client = self.ConfigSectionMap(config, "Pushover")['client']
 	self._email_source = self.ConfigSectionMap(config, "Email")['source']
 	self._email_password = self.ConfigSectionMap(config, "Email")['password']
+	self._email_destination = self.ConfigSectionMap(config, "Email")['destination']
 
     def thingspeak_thread(self):
         # Wait 60 seconds to let things warm up
