@@ -28,7 +28,7 @@ class Proximity(object):
 
     def _ping_nodes(self):
         for node in self.ping_nodes:
-            response = os.system("ping -c 1 " + node)
+            response = os.system("ping -c 1 -w 2 " + node + " > /dev/null 2>&1")
             if response == 0:
                 self.last_ping_detected = datetime.datetime.now()
 

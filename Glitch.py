@@ -6,7 +6,7 @@ from Thingspeak import Thingspeak
 from threading import Thread
 from Pushover import Pushover
 from ArduinoClient import ArduinoClient
-#from Proximity import Proximity
+from Proximity import Proximity
 import time
 import ConfigParser
 import os
@@ -34,9 +34,10 @@ class Glitch(object):
         self.arduino.set_motion_detect_callback(self.motion_detected)
 
         #Proximity
-        #self.proximity = Proximity()
-        #self.proximity.set_motion_sensor(self.arduino, ('Living Room', 'Basement Hallway', 'Basement'))
-        #self.proximity.add_ping_node('192.168.0.110')
+        self.proximity = Proximity()
+        self.proximity.set_motion_sensor(self.arduino, ('Living Room', 'Basement Hallway', 'Basement'))
+        for s in self._ping_nodes:
+            self.proximity.add_ping_node(s)
 
         #Thermostat
         self.tstat = Thermostat(self._thermostat_ip_address, self._thermostat_period_s)
@@ -70,6 +71,8 @@ class Glitch(object):
         self._weather_period_s = int(self.ConfigSectionMap(config, "Weather")['period_s'])
         self._pushover_token = self.ConfigSectionMap(config, "Pushover")['token']
         self._pushover_client = self.ConfigSectionMap(config, "Pushover")['client']
+        s = self.ConfigSectionMap(config, "Proximity")['ping_nodes']
+        self._ping_nodes = str.split(s,':')
 
     def thingspeak_thread(self):
         # Wait 60 seconds to let things warm up
