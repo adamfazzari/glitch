@@ -4,6 +4,7 @@ import time
 import datetime
 import json
 import urllib2
+import logging
 from threading import Thread
 from Temperature import Temperature
 
@@ -24,16 +25,17 @@ class Thermostat(object):
 
     def _monitor(self):
         while self._monitor_active:
-            print("Starting thermostat write")
+            logging.debug("Thermostat: Starting write")
             self._write_thermostat()
             time.sleep(self._monitor_period * 1 / 10)
-            print("Starting thermostat read")
+            logging.debug("Thermostat: Starting read")
             if self._read_thermostat():
                 self._read_errors = 0
             else:
                 self._read_errors += 1
 
             if self._read_errors == 5:
+                logging.warning("Thermostat: Haven't made contact in 5 cycles")
                 self.notify("Haven't made contact with thermostat in 5 cycles")
 
             time.sleep(self._monitor_period * 9 / 10)
@@ -45,7 +47,7 @@ class Thermostat(object):
         except:
             return read_successful
         line = response.readline()
-        print(line)
+        logging.debug("Thermostat: " + line)
         jline = json.loads(line)
         if jline.has_key('temp'):
             if jline['temp'] != -1:
@@ -77,15 +79,15 @@ class Thermostat(object):
                 self.notify("Correcting time; day:%d hour:%d minute:%d" % (d, h, m))
 
         #print self.current_temp.fahrenheit
-        print ("Current temp in celsius: " + str(self.current_temp.celsius))
+        #print ("Current temp in celsius: " + str(self.current_temp.celsius))
         return read_successful
 
     def _write_thermostat(self):
         if self.command == '':
-            print ("Nothing to write")
+            logging.debug("Thermostat: Nothing to write")
             return None
 
-        print ("Writing command")
+        logging.debug("Thermostat: Writing command")
         #data = json.dumps(self.command)
         request = urllib2.Request('http://' + self._ip_address + '/tstat', self.command, self.JSON_HEADER)
         #Clear the command so we don't write it again
@@ -123,7 +125,7 @@ class Thermostat(object):
             d = json.loads(self.command)
         d[key] = value
         self.command = json.dumps(d)
-        print("New command: " + self.command)
+        logging.debug("Thermostat: New command - " + self.command)
 
     def notify(self, message):
         if self._notify_callback:

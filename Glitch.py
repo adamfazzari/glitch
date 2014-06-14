@@ -5,11 +5,13 @@ from Weather import WeatherMonitor
 from Thingspeak import Thingspeak
 from threading import Thread
 from Pushover import Pushover
+from EmailNotify import send_mail
 from ArduinoClient import ArduinoClient
 from Proximity import Proximity
 import time
 import ConfigParser
 import os
+import logging
 from flask import Flask, url_for
 from flask import render_template
 
@@ -19,6 +21,9 @@ app = Flask(__name__)
 class Glitch(object):
 
     def __init__(self):
+        #logging.basicConfig(filename='/var/log/glitch.log', level=logging.DEBUG)
+	    logging.basicConfig(level=logging.DEBUG)
+        logging.info("Glitch: Started")
         self.armed = False
         self.status = ''
         self._load_settings()
@@ -30,8 +35,9 @@ class Glitch(object):
         self.ts = Thingspeak(self._thingspeak_api_key)
 
         #Arduino
-        self.arduino = ArduinoClient(self._arduino_ip_address, self._arduino_port)
+        self.arduino = ArduinoClient(self._arduino_ip_address, self._arduino_port, self.notify)
         self.arduino.set_motion_detect_callback(self.motion_detected)
+	self.max_notifications = 10
 
         #Proximity
         self.proximity = Proximity()
@@ -56,6 +62,8 @@ class Glitch(object):
 
     def notify(self, message):
         self.pushover.send_message(message, "Glitch")
+	send_mail(self._email_source, self._email_password, self._email_destination, "Glitch", message)
+
 
     def _load_settings(self):
         config = ConfigParser.ConfigParser()
@@ -71,8 +79,9 @@ class Glitch(object):
         self._weather_period_s = int(self.ConfigSectionMap(config, "Weather")['period_s'])
         self._pushover_token = self.ConfigSectionMap(config, "Pushover")['token']
         self._pushover_client = self.ConfigSectionMap(config, "Pushover")['client']
-        s = self.ConfigSectionMap(config, "Proximity")['ping_nodes']
-        self._ping_nodes = str.split(s,':')
+	self._email_source = self.ConfigSectionMap(config, "Email")['source']
+	self._email_password = self.ConfigSectionMap(config, "Email")['password']
+	self._email_destination = self.ConfigSectionMap(config, "Email")['destination']
 
     def thingspeak_thread(self):
         # Wait 60 seconds to let things warm up
@@ -88,7 +97,7 @@ class Glitch(object):
             d['field6'] = self.arduino._basement_hallway_state
             d['field7'] = self.arduino._basement_state
             #d['field8'] = int(self.proximity.is_anyone_home())
-            print(d)
+            logging.debug("Thingspeak:" + str(d))
             self.ts.write(d)
             #Update thingspeak every 5 minutes
             time.sleep(self._thingspeak_period_s)
@@ -103,15 +112,30 @@ class Glitch(object):
                     pass
                     #DebugPrint("skip: %s" % option)
             except:
-                print("exception on %s!" % option)
+                logging.error("exception on %s!" % option)
                 dict1[option] = None
         return dict1
+    
+    def arm(self):
+        self.armed = True
+	self.max_notifications = 10
+        self.arduino.set_motion_detect_callback(self.motion_detected)
+	self.notify("System armed")
+
+    def disarm(self):
+        self.armed = False
+        self.status = ''
+	self.notify("System disarmed")
 
     def motion_detected(self, location):
-        if self.armed:
-            self.arduino.set_motion_detect_callback(None)
+        if self.armed and self.max_notifications > 0:
+            #self.arduino.set_motion_detect_callback(None)
+	    self.max_notifications -= 1
             self.status = "Motion detected in " + location
             self.notify(self.status)
+	    if self.max_notifications == 0:
+		self.notify("Maximum number of notifications reached, disarming")
+		self.disarm()
 
 if __name__ == '__main__':
     g = Glitch()
@@ -120,12 +144,11 @@ if __name__ == '__main__':
     @app.route('/<arm>')
     def helloworld(arm='none'):
         if arm == 'true':
-            g.armed = True
+            g.arm()
         elif arm == 'false':
-            g.armed = False
-            g.status = ''
+            g.disarm()
         #a = {'current_temp':g.tstat.current_temp.celsius, 'armed':g.armed}
         return render_template('glitch.html', current_temp=g.tstat.current_temp.celsius, armed=g.armed, message=g.status)
 
-    app.run()
+    app.run(host='0.0.0.0')
 
