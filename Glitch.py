@@ -44,6 +44,7 @@ class Glitch(object):
         self.proximity.set_motion_sensor(self.arduino, ('Living Room', 'Basement Hallway', 'Basement'))
         for s in self._ping_nodes:
             self.proximity.add_ping_node(s)
+        self.proximity._state_change_callback = self.proximity_change
 
         #Thermostat
         self.tstat = Thermostat(self._thermostat_ip_address, self._thermostat_period_s)
@@ -62,8 +63,13 @@ class Glitch(object):
 
     def notify(self, message):
         self.pushover.send_message(message, "Glitch")
-    send_mail(self._email_source, self._email_password, self._email_destination, "Glitch", message)
+        send_mail(self._email_source, self._email_password, self._email_destination, "Glitch", message)
 
+    def proximity_change(self, state):
+        if state == 0:
+            self.disarm()
+        else:
+            self.arm()
 
     def _load_settings(self):
         config = ConfigParser.ConfigParser()
@@ -82,6 +88,8 @@ class Glitch(object):
         self._email_source = self.ConfigSectionMap(config, "Email")['source']
         self._email_password = self.ConfigSectionMap(config, "Email")['password']
         self._email_destination = self.ConfigSectionMap(config, "Email")['destination']
+        s = self.ConfigSectionMap(config, "Proximity")['ping_nodes']
+        self._ping_nodes = str.split(s,":")
 
     def thingspeak_thread(self):
         # Wait 60 seconds to let things warm up
@@ -104,6 +112,8 @@ class Glitch(object):
 
     def ConfigSectionMap(self, config, section):
         dict1 = {}
+        if not config.has_section(section):
+            return dict1
         options = config.options(section)
         for option in options:
             try:

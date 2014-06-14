@@ -16,15 +16,29 @@ class Proximity(object):
         self.last_motion_detected = datetime.datetime.now()
         self.last_motion_ended = datetime.datetime.now()
         self.ping_nodes = []
+        self._state = 0
+        self._state_change_callback = None  #Callback when a new state has been detected, 0=People are home, 1=No one's home
         self.pinger = Thread(target=self._ping_thread)
         self.pinger.start()
+
 
     def add_ping_node(self, ip_address):
         self.ping_nodes.append(ip_address)
 
     def _ping_thread(self):
-        self._ping_nodes()
-        time.sleep(300)
+        while True:
+            self._ping_nodes()
+            if self.is_anyone_home():
+                state = 0
+            else:
+                state = 1
+
+            if state != self._state and self._state_change_callback:
+                self._state_change_callback(state)
+
+            self._state = state
+
+            time.sleep(300)
 
     def _ping_nodes(self):
         for node in self.ping_nodes:
@@ -53,7 +67,6 @@ class Proximity(object):
                     if motion == 0:
                         print("All motion ended")
                         self.last_motion_ended = datetime.datetime.now()
-
 
     def is_anyone_home(self):
         #Figures out based on various inputs if anyone is home
