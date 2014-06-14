@@ -22,7 +22,7 @@ class Glitch(object):
 
     def __init__(self):
         #logging.basicConfig(filename='/var/log/glitch.log', level=logging.DEBUG)
-	    logging.basicConfig(level=logging.DEBUG)
+        logging.basicConfig(level=logging.DEBUG)
         logging.info("Glitch: Started")
         self.armed = False
         self.status = ''
@@ -37,7 +37,7 @@ class Glitch(object):
         #Arduino
         self.arduino = ArduinoClient(self._arduino_ip_address, self._arduino_port, self.notify)
         self.arduino.set_motion_detect_callback(self.motion_detected)
-	self.max_notifications = 10
+        self.max_notifications = 10
 
         #Proximity
         self.proximity = Proximity()
@@ -62,7 +62,7 @@ class Glitch(object):
 
     def notify(self, message):
         self.pushover.send_message(message, "Glitch")
-	send_mail(self._email_source, self._email_password, self._email_destination, "Glitch", message)
+    send_mail(self._email_source, self._email_password, self._email_destination, "Glitch", message)
 
 
     def _load_settings(self):
@@ -79,9 +79,9 @@ class Glitch(object):
         self._weather_period_s = int(self.ConfigSectionMap(config, "Weather")['period_s'])
         self._pushover_token = self.ConfigSectionMap(config, "Pushover")['token']
         self._pushover_client = self.ConfigSectionMap(config, "Pushover")['client']
-	self._email_source = self.ConfigSectionMap(config, "Email")['source']
-	self._email_password = self.ConfigSectionMap(config, "Email")['password']
-	self._email_destination = self.ConfigSectionMap(config, "Email")['destination']
+        self._email_source = self.ConfigSectionMap(config, "Email")['source']
+        self._email_password = self.ConfigSectionMap(config, "Email")['password']
+        self._email_destination = self.ConfigSectionMap(config, "Email")['destination']
 
     def thingspeak_thread(self):
         # Wait 60 seconds to let things warm up
@@ -118,14 +118,14 @@ class Glitch(object):
     
     def arm(self):
         self.armed = True
-	self.max_notifications = 10
+        self.max_notifications = 10
         self.arduino.set_motion_detect_callback(self.motion_detected)
-	self.notify("System armed")
+        self.notify("System armed")
 
     def disarm(self):
         self.armed = False
         self.status = ''
-	self.notify("System disarmed")
+        self.notify("System disarmed")
 
     def motion_detected(self, location):
         if self.armed and self.max_notifications > 0:
@@ -133,9 +133,9 @@ class Glitch(object):
 	    self.max_notifications -= 1
             self.status = "Motion detected in " + location
             self.notify(self.status)
-	    if self.max_notifications == 0:
-		self.notify("Maximum number of notifications reached, disarming")
-		self.disarm()
+        if self.max_notifications == 0:
+            self.notify("Maximum number of notifications reached, disarming")
+            self.disarm()
 
 if __name__ == '__main__':
     g = Glitch()
