@@ -63,7 +63,7 @@ class Glitch(object):
 
     def notify(self, message):
         self.pushover.send_message(message, "Glitch")
-        send_mail(self._email_source, self._email_password, self._email_destination, "Glitch", message)
+        if self._email_enabled: send_mail(self._email_source, self._email_password, self._email_destination, "Glitch", message)
 
     def proximity_change(self, state):
         if state == 0:
@@ -91,9 +91,12 @@ class Glitch(object):
         self._weather_period_s = int(self.ConfigSectionMap(config, "Weather")['period_s'])
         self._pushover_token = self.ConfigSectionMap(config, "Pushover")['token']
         self._pushover_client = self.ConfigSectionMap(config, "Pushover")['client']
-        self._email_source = self.ConfigSectionMap(config, "Email")['source']
-        self._email_password = self.ConfigSectionMap(config, "Email")['password']
-        self._email_destination = self.ConfigSectionMap(config, "Email")['destination']
+        if config.has_section("Email"):
+            self._email_enabled = self.ConfigSectionMap(config, "Email")['enabled'] == "True"
+            if self._email_enabled:
+                self._email_source = self.ConfigSectionMap(config, "Email")['source']
+                self._email_password = self.ConfigSectionMap(config, "Email")['password']
+                self._email_destination = self.ConfigSectionMap(config, "Email")['destination']
         s = self.ConfigSectionMap(config, "Proximity")['ping_nodes']
         self._ping_nodes = str.split(s,":")
 
