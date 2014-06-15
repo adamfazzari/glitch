@@ -16,11 +16,11 @@ class Proximity(object):
         self.last_motion_detected = datetime.datetime.now()
         self.last_motion_ended = datetime.datetime.now()
         self.ping_nodes = []
-        self._state = 0
+        self._state = 0 #0=no one home, 1=motion detected, 2=ping detected
         self._state_change_callback = None  #Callback when a new state has been detected, 0=People are home, 1=No one's home
         self.pinger = Thread(target=self._ping_thread)
         self.pinger.start()
-
+        self.pinger_period = 300
 
     def add_ping_node(self, ip_address):
         self.ping_nodes.append(ip_address)
@@ -28,17 +28,20 @@ class Proximity(object):
     def _ping_thread(self):
         while True:
             self._ping_nodes()
-            if self.is_anyone_home():
-                state = 0
+            state = self.is_anyone_home()
+            if state == 2:
+                #Ping less often if pink has been detected
+                self.pinger_period = 300
             else:
-                state = 1
+                #Ping more often when no one's home or only motion has been detected
+                self.pinger_period = 60
 
             if state != self._state and self._state_change_callback:
                 self._state_change_callback(state)
 
             self._state = state
 
-            time.sleep(300)
+            time.sleep(self.pinger_period)
 
     def _ping_nodes(self):
         for node in self.ping_nodes:
@@ -70,6 +73,7 @@ class Proximity(object):
 
     def is_anyone_home(self):
         #Figures out based on various inputs if anyone is home
+        #Returns 0 for no people detected, 1 for motion detected, 2 for ping detected
         motion = False
         if len(self.motion_sensors) > 0:
             motion = True
@@ -85,6 +89,10 @@ class Proximity(object):
                 ping = False
 
         if not ping and not motion:
-            return False
+            return 0
 
-        return True
+        if motion:
+            return 1
+
+        if ping:
+            return 2

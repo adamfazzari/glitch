@@ -67,9 +67,15 @@ class Glitch(object):
 
     def proximity_change(self, state):
         if state == 0:
-            self.disarm()
-        else:
+            #No ones home
             self.arm()
+        elif state == 1:
+            #Motion detected
+            #Could use this to set the thermostat
+            pass
+        else:
+            #Ping detected
+            self.disarm()
 
     def _load_settings(self):
         config = ConfigParser.ConfigParser()
