@@ -57,7 +57,7 @@ class Thermostat(object):
 
         line = response.readline()
         logging.debug("Thermostat data log: " + line)
-        jline = json.load(line)
+        jline = json.loads(line)
         jline = jline['yesterday'] if 'yesterday' in jline else jline
         jline = jline['heat_runtime'] if 'heat_runtime' in jline else jline
         minutes = int(jline['minutes']) if 'minutes' in jline else 0
