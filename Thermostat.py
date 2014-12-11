@@ -15,6 +15,8 @@ class Thermostat(object):
         self.current_temp = Temperature()
         self.set_point_temp = Temperature()
         self.furnace_state = 0
+        self.day = -1
+        self.yesterday_runtime_min = 0
         self.command = ''
         self._monitor_thread = Thread(target=self._monitor)
         self._monitor_active = False
@@ -31,6 +33,12 @@ class Thermostat(object):
             logging.debug("Thermostat: Starting read")
             if self._read_thermostat():
                 self._read_errors = 0
+
+                #Check for a date change
+                if int(self.current_time['day']) <> self.day:
+                    self.day = int(self.current_time['day'])
+                    self._read_thermostat_runtime()
+
             else:
                 self._read_errors += 1
 
@@ -39,6 +47,23 @@ class Thermostat(object):
                 self.notify("Haven't made contact with thermostat in 5 cycles")
 
             time.sleep(self._monitor_period * 9 / 10)
+
+
+    def _read_thermostat_runtime(self):
+        try:
+            response = urllib2.urlopen('http://' + self._ip_address + '/tstat/datalog')
+        except:
+            return False
+
+        line = response.readline()
+        logging.debug("Thermostat data log: " + line)
+        jline = json.load(line)
+        jline = jline['yesterday'] if 'yesterday' in jline else jline
+        jline = jline['heat_runtime'] if 'heat_runtime' in jline else jline
+        minutes = int(jline['minutes']) if 'minutes' in jline else 0
+        minutes += int(jline['hours']) * 60 if 'hours' in jline else 0
+        self.yesterday_runtime_min = minutes
+        return True
 
     def _read_thermostat(self):
         read_successful = False
