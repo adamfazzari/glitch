@@ -60,9 +60,11 @@ class Thermostat(object):
         jline = json.loads(line)
         jline = jline['yesterday'] if 'yesterday' in jline else jline
         jline = jline['heat_runtime'] if 'heat_runtime' in jline else jline
+        logging.debug("Thermostat: jline: " + jline)
         minutes = int(jline['minutes']) if 'minutes' in jline else 0
         minutes += int(jline['hours']) * 60 if 'hours' in jline else 0
         self.yesterday_runtime_min = minutes
+        logging.debug("Thermostat: Setting yesterday's runtime to " + str(minutes) + " minutes")
         return True
 
     def _read_thermostat(self):
