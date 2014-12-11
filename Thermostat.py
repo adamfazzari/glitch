@@ -66,20 +66,7 @@ class Thermostat(object):
 
         if self.current_time['day'] > -1 and self.current_time['hour'] > -1 and self.current_time['minute'] >-1:
             read_successful = True
-            #Compare to current date and time
-            t1 = datetime.datetime.now()
-            d = datetime.datetime.weekday(t1)
-            h = t1.hour
-            m = t1.minute
 
-            if abs(int(self.current_time['minute']) - m) > 5 or int(self.current_time['hour']) != h or int(self.current_time['day']) != d:
-                self.set_time(d, h, m)
-                self._write_thermostat()
-                self.notify("Thermostat time; day:%d hour:%d minute:%d" % (self.current_time['day'], self.current_time['hour'], self.current_time['minute']))
-                self.notify("Correcting time; day:%d hour:%d minute:%d" % (d, h, m))
-
-        #print self.current_temp.fahrenheit
-        #print ("Current temp in celsius: " + str(self.current_temp.celsius))
         return read_successful
 
     def _write_thermostat(self):
